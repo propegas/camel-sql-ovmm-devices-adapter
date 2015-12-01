@@ -134,9 +134,11 @@ public class Main {
 						.choice()
 							.when(header("queueName").isEqualTo("Devices"))
 								.to("activemq:{{devicesqueue}}")
+								.log("*** Device: ${id} ${header.DeviceId}")
 							.otherwise()
 								.to("activemq:{{eventsqueue}}")
-						.endChoice()
+								.log("*** Event: ${id} ${header.DeviceId}")
+							.end()
 						.log("*** Device: ${id} ${header.DeviceId}");
 				
 				// Heartbeats
