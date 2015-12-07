@@ -150,7 +150,7 @@ public class Main {
 				})
 				//.bean(WsdlNNMConsumer.class, "genHeartbeatMessage", exchange)
 		        .marshal(myJson)
-		        .to("activemq:{{eventsqueue}}")
+		        .to("activemq:{{heartbeatsqueue}}")
 				.log("*** Heartbeat: ${id}");
 						
 				}

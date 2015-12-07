@@ -150,7 +150,9 @@ public class OVMMConsumer extends ScheduledPollConsumer {
         exchange.getIn().setBody(genevent, Event.class);
         
         exchange.getIn().setHeader("Timestamp", timestamp);
-        exchange.getIn().setHeader("queueName", "Events");
+        exchange.getIn().setHeader("queueName", "Heartbeats");
+        exchange.getIn().setHeader("Type", "Heartbeats");
+        exchange.getIn().setHeader("Source", "OVMM_DEVICE_ADAPTER");
 
         try {
         	//Processor processor = getProcessor();
@@ -173,6 +175,8 @@ public class OVMMConsumer extends ScheduledPollConsumer {
 		genevent.setSeverity(PersistentEventSeverity.CRITICAL.name());
 		genevent.setTimestamp(timestamp);
 		genevent.setEventsource("OVMM_DEVICE_ADAPTER");
+		genevent.setStatus("OPEN");
+		genevent.setHost("adapter");
 		
 		logger.info(" **** Create Exchange for Error Message container");
         Exchange exchange = getEndpoint().createExchange();
@@ -191,7 +195,7 @@ public class OVMMConsumer extends ScheduledPollConsumer {
 	}
 	
 	// "throws Exception" 
-	private int processSearchDevices()  throws Exception, Error {
+	private int processSearchDevices()  throws Exception, Error, SQLException {
 		
 		//Long timestamp;
 		DataSource dataSource = setupDataSource();
@@ -251,13 +255,39 @@ public class OVMMConsumer extends ScheduledPollConsumer {
 			logger.info( String.format("***Received %d Devices from SQL*** ", listAllDevices.size()));
 	  
 			
-		} catch (Throwable e) {
+		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			logger.error( String.format("Error while get Devices SQL: %s ", e));
+			logger.error( String.format("Error while get Events from SQL: %s ", e));
+			genErrorMessage(e.toString());
+			return 0;
+		}
+		catch (NullPointerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			logger.error( String.format("Error while get Events from SQL: %s ", e));
+			genErrorMessage(e.toString());
+			return 0;
+		}
+		catch (Error e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			logger.error( String.format("Error while get Events from SQL: %s ", e));
+			genErrorMessage(e.toString());
+			return 0;
+		}
+		catch (Throwable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			logger.error( String.format("Error while get Events from SQL: %s ", e));
 			genErrorMessage(e.getMessage() + " " + e.toString());
 			return 0;
 		}
+		finally
+		{
+			//return 0;
+		}
+		
 		
 		logger.info( String.format("***Sended to Exchange messages: %d ***", devicesCount));
 	
@@ -339,7 +369,7 @@ public class OVMMConsumer extends ScheduledPollConsumer {
 			
 			if (con != null) con.close();
 			
-			return null;
+			throw e;
 
 		} finally {
             if (con != null) con.close();
