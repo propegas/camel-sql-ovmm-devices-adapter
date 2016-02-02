@@ -67,7 +67,7 @@ public class OVMMConsumer extends ScheduledPollConsumer {
 	
 	private static Logger logger = LoggerFactory.getLogger(Main.class);
 	
-	public OVMMEndpoint endpoint;
+	public static OVMMEndpoint endpoint;
 	
 	public String vm_ping_col =  "attribute043";
 	public String vm_snmp_col =  "attribute044";
@@ -91,7 +91,7 @@ public class OVMMConsumer extends ScheduledPollConsumer {
 
 	public OVMMConsumer(OVMMEndpoint endpoint, Processor processor) {
         super(endpoint, processor);
-        this.endpoint = endpoint;
+        OVMMConsumer.endpoint = endpoint;
         //this.afterPoll();
         this.setTimeUnit(TimeUnit.MINUTES);
         this.setInitialDelay(0);
@@ -231,6 +231,8 @@ public class OVMMConsumer extends ScheduledPollConsumer {
 				Exchange exchange = getEndpoint().createExchange();
 		        exchange.getIn().setBody(gendevice, Device.class);
 		        exchange.getIn().setHeader("DeviceId", gendevice.getId());
+		        exchange.getIn().setHeader("DeviceType", gendevice.getDeviceType());
+		        exchange.getIn().setHeader("ParentId", gendevice.getParentID());
 		        exchange.getIn().setHeader("queueName", "Devices");
 				//exchange.getIn().setHeader("DeviceType", vmevents.get(i).getDeviceType());
 				
@@ -299,9 +301,17 @@ public class OVMMConsumer extends ScheduledPollConsumer {
 		
 		String vm_type_name= endpoint.getConfiguration().getVm_type();
 		String deviceType = "";
+		String ttt = "ttt";
 		
-		if (device.get("type").toString() == vm_type_name){
-			deviceType = "vm";
+		logger.debug("*** endpoint.getConfiguration().getVmDeviceType(): " + endpoint.getConfiguration().getVmDeviceType());
+		logger.debug("*** endpoint.getConfiguration().getVm_type(): " + endpoint.getConfiguration().getVm_type());
+		logger.debug("*** device.get(type).toString(): " + device.get("type").toString());
+		logger.debug("*** type: " + device.get("type").toString());
+		logger.debug("*** 123: " + ttt);
+		logger.debug("*** vm_type_name: " + vm_type_name);
+		
+		if (device.get("type").toString().equals(vm_type_name)){
+			deviceType = endpoint.getConfiguration().getVmDeviceType();
 		}
 		else {
 			deviceType = device.get("type").toString();
@@ -315,12 +325,12 @@ public class OVMMConsumer extends ScheduledPollConsumer {
 		gendevice.setDeviceType(deviceType);
 		//gendevice.setModelName(node.getDeviceModel());
 		//gendevice.setDeviceState(setRightStatus(node.getStatus().name()));
-		gendevice.setId(device.get("id").toString());
+		gendevice.setId("OVMM:" + device.get("id").toString());
 		//gendevice.setParentID(node.getCustomAttributes()[0].getValue());
 		//gendevice.set(node.getUuid());
 		//gendevice.setGroups(groupNames);
 		gendevice.setSource("OVMM");
-		gendevice.setParentID(device.get("parent_id").toString());
+		gendevice.setParentID("OVMM:" + device.get("parent_id").toString());
 		//gendevice.set
 		
 		logger.debug(gendevice.toString());

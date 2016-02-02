@@ -21,6 +21,8 @@ public class OVMMConfiguration {
     @UriParam
     private String table_prefix;
     
+    private String  vmDeviceType;
+    
     public String getTable_prefix() {
 		return table_prefix;
 	}
@@ -100,6 +102,14 @@ public class OVMMConfiguration {
 
 	public void setVm_type(String vm_type) {
 		this.vm_type = vm_type;
+	}
+
+	public String getVmDeviceType() {
+		return vmDeviceType;
+	}
+
+	public void setVmDeviceType(String vmDeviceType) {
+		this.vmDeviceType = vmDeviceType;
 	}
 
 

@@ -36,6 +36,7 @@ import org.apache.camel.processor.cache.CacheBasedTokenReplacer;
 import org.apache.camel.processor.idempotent.FileIdempotentRepository;
 import org.apache.log4j.Level;
 
+import ru.at_consulting.itsm.device.Device;
 import ru.at_consulting.itsm.event.Event;
 
 public class Main {
@@ -76,7 +77,7 @@ public class Main {
 				JsonDataFormat myJson = new JsonDataFormat();
 				myJson.setPrettyPrint(true);
 				myJson.setLibrary(JsonLibrary.Jackson);
-				myJson.setJsonView(Event.class);
+				myJson.setJsonView(Device.class);
 				
 				context = getContext();
 				
@@ -121,6 +122,8 @@ public class Main {
 		    			+ "mysql_db={{mysql_db}}&"
 		    			+ "mysql_port={{mysql_port}}&"
 		    			+ "table_prefix={{table_prefix}}&"
+		    			+ "vmDeviceType={{setVmDeviceType}}&"
+		    			+ "vm_type={{vm_type}}&"
 		    			+ "query={{query}}")
 		    	
 		    /*
